@@ -1,8 +1,10 @@
+import UserResults from '../users/UserResults'
+
 function Home() {
     return (
-        <div>
-            home
-        </div>
+        <>
+            <UserResults />
+        </>
     )
 }
 
