@@ -19,26 +19,34 @@ export const GithubProvider = ({children}) => {
         dispatch({type: 'SET_LOADING'})
     }
 
-    const fetchUsers = async () => {
+    const clearSearch = () => {
+        dispatch({
+            type: 'CLEAR_USERS',
+            payload: []
+        })
+    }
+
+    const searchUsers = async (text) => {
         setLoading()
-        const response = await fetch(`${GITHUB_URL}/users`, {
+        const response = await fetch(`${GITHUB_URL}/search/users?q=${text}`, {
             headers: {
                 Authorization: `token ${GITHUB_TOKEN}`
             }
         })
 
-        const data = await response.json()
+        const {items} = await response.json()
         
         dispatch({
             type: 'GET_USERS',
-            payload: data
+            payload: items
         })
     }
 
     return <GithubContext.Provider value={{
         users: state.users,
         loading: state.loading,
-        fetchUsers
+        searchUsers,
+        clearSearch
     }}>
         {children}
     </GithubContext.Provider>
