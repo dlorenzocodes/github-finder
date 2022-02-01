@@ -1,20 +1,42 @@
+import RepoList from '../repos/RepoList'
 import { FaCodepen, FaStore, FaUserFriends, FaUsers} from 'react-icons/fa'
 import {useContext, useEffect} from 'react'
 import {Link} from 'react-router-dom'
 import GithubContext from '../../context/github/GithubContext'
 import Spinner from '../layout/Spinner'
+import {getSingleUser} from '../../context/github/GithubActions'
+import {getUserRepos} from '../../context/github/GithubActions'
 import {useParams} from 'react-router-dom'
 
 
 function User() {
 
-    const {getSingleUser, user, loading} = useContext(GithubContext)
+    const {user, loading, repos, dispatch} = useContext(GithubContext)
 
     const params = useParams()
 
+    // useEffect(() => {
+    //     getSingleUser(params.login)
+    //     getUserRepos(params.login)
+    //     // to make the warning disappear - not best option
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // },[])
+
     useEffect(() => {
-        getSingleUser(params.login)
-    },[])
+        dispatch({type: 'SET_LOADING'})
+        const getUserData = async () => {
+            const userData = await getSingleUser(params.login)
+            dispatch({type: 'GET_USER', payload: userData})
+
+            const userRepoData = await getUserRepos(params.login)
+            dispatch({type: 'GET_REPOS', payload: userRepoData})
+        }
+
+        getUserData()
+
+        // it's fine to add these as dependencies because they are not constanly
+        // changing like the functions
+    }, [dispatch, params.login])
 
     const {
         name,
@@ -32,6 +54,10 @@ function User() {
         public_gists,
         hireable
     } = user
+
+    if(loading){
+        <Spinner />
+    }
 
     return (
         <>
@@ -146,6 +172,8 @@ function User() {
                         </div>
                     </div>
                 </div>
+
+                <RepoList repos={repos}/>
            </div>
         </>
     )
